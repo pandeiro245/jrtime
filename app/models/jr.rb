@@ -2,10 +2,13 @@ class Jr
   def initialize(driver=nil)
     @driver = driver
     @col_i = 2
-    @date = '1月5日（日）'
-    # @col_i = 3
+    # @date = '1月4日（土）'
+    @date = '12月31日（火）'
+    # @col_i = 4
     # @date = '1月6日（月）'
     @time = '6:00'
+    # @sheet_title = '新大阪→品川'
+    @sheet_title = '東京→京都'
   end
 
   def driver
@@ -25,7 +28,6 @@ class Jr
   end
 
   def ws(sheet_title=nil)
-    @sheet_title ||= '品川→新大阪'
     @ws ||= ss.worksheet_by_title(@sheet_title)
   end
 
@@ -133,8 +135,13 @@ class Jr
     # 降車:新大阪
     # driver.select_list(id: 's7').select('170')
 
-    driver.select_list(id: 's6').select('170')
-    driver.select_list(id: 's7').select('020')
+    # 新大阪→品川
+    # driver.select_list(id: 's6').select('170')
+    # driver.select_list(id: 's7').select('020')
+
+    # 東京→京都
+    driver.select_list(id: 's6').select('010')
+    driver.select_list(id: 's7').select('160')
 
 
     driver.button(id: 'sb-1').click
