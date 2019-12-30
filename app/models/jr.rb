@@ -1,14 +1,33 @@
 class Jr
   def initialize(driver=nil)
     @driver = driver
-    @col_i = 2
-    # @date = '1月4日（土）'
-    @date = '12月31日（火）'
-    # @col_i = 4
-    # @date = '1月6日（月）'
+    @col_i = 2 # TODO
+    @date = '1月3日（金）' # TODO
     @time = '6:00'
-    # @sheet_title = '新大阪→品川'
-    @sheet_title = '東京→京都'
+
+    row_i = 2
+   
+    @start_name = ws_log[row_i, 2]
+    @start_code = name2code[@start_name]
+    @goal_name  = ws_log[row_i, 3]
+    @goal_code  = name2code[@goal_name]
+    @sheet_title = "#{@start_name}→#{@goal_name}"
+  end
+
+
+  def name2code
+    @name2code ||= get_name2code
+  end
+
+  def get_name2code
+    res = {}
+    _ws = ws_stations
+    2.upto(_ws.max_rows).each do |row_i|
+      code =  format("%03d", _ws[row_i, 1])
+      name = _ws[row_i, 2]
+      res[name] = code
+    end
+    res
   end
 
   def driver
@@ -20,6 +39,10 @@ class Jr
     end
   end
 
+  def get_ws(sheet_name)
+    ss.worksheet_by_title(sheet_name)
+  end
+
   def ss
     key = '1r4tADlGU2v7mspnJOxeLnVk5QcUnZ3Nf7fFzWE8mOWE'
     @ss ||= Api::Google.new.gdrive.spreadsheet_by_key(
@@ -27,8 +50,16 @@ class Jr
     )
   end
 
-  def ws(sheet_title=nil)
+  def ws
     @ws ||= ss.worksheet_by_title(@sheet_title)
+  end
+
+  def ws_log
+    ws_log ||= get_ws('log')
+  end
+
+  def ws_stations
+    ws_stations ||= get_ws('stations')
   end
 
   def exec
@@ -45,8 +76,13 @@ class Jr
         return
       else
         exec
+        time = @time
       end
     end
+    row_i = 2
+    col_i = 5
+    Time.zone = 'Tokyo'
+    ws_log[row_i, col_i] = Time.local.now 
   end
 
   def time2row_i
@@ -129,21 +165,8 @@ class Jr
     hour_str = format("%02d", @time.split(':').first)
     driver.select_list(id: 's-3').select(hour_str)
     driver.select_list(id: 's-4').select('00')
-
-    # 乗車: 品川
-    # driver.select_list(id: 's6').select('020')
-    # 降車:新大阪
-    # driver.select_list(id: 's7').select('170')
-
-    # 新大阪→品川
-    # driver.select_list(id: 's6').select('170')
-    # driver.select_list(id: 's7').select('020')
-
-    # 東京→京都
-    driver.select_list(id: 's6').select('010')
-    driver.select_list(id: 's7').select('160')
-
-
+    driver.select_list(id: 's6').select(@start_code)
+    driver.select_list(id: 's7').select(@goal_code)
     driver.button(id: 'sb-1').click
   end
 
