@@ -1,8 +1,8 @@
 class Jr
   def initialize(driver=nil)
     @driver = driver
-    @col_i = 3 # TODO
-    @date = '1月2日（木）' # TODO
+    @col_i = 6 # TODO
+    @date = '1月5日（日）' # TODO
     @time = '6:00'
 
     log_row_i = 2
