@@ -1,5 +1,11 @@
 class Jr
-  def initialize
+  def initialize(driver=nil)
+    @driver = driver
+    @col_i = 2
+    @date = '1月5日（日）'
+    # @col_i = 3
+    # @date = '1月6日（月）'
+    @time = '6:00'
   end
 
   def driver
@@ -11,7 +17,137 @@ class Jr
     end
   end
 
-	def login
-		driver.goto ENV['APLEX_URL']
-	end
+  def ss
+    key = '1r4tADlGU2v7mspnJOxeLnVk5QcUnZ3Nf7fFzWE8mOWE'
+    @ss ||= Api::Google.new.gdrive.spreadsheet_by_key(
+      key
+    )
+  end
+
+  def ws(sheet_title=nil)
+    @sheet_title ||= '品川→新大阪'
+    @ws ||= ss.worksheet_by_title(@sheet_title)
+  end
+
+  def exec
+    login
+    goto_yoyaku
+    input_goal
+
+    time = @time
+    select_goal
+
+    loop do
+      select_goal
+      if @time == time || time.split(':').first.to_i > 22
+        return
+      else
+        exec
+      end
+    end
+  end
+
+  def time2row_i
+    @time2row_i ||= get_time2row_i
+  end
+
+  def get_time2row_i
+    res = {}
+    return res if ws.max_rows < 2
+    2.upto(ws.max_rows).each do |row_i|
+      time = ws[row_i, 1]
+      res[time] = row_i
+    end
+    res
+  end
+
+  def select_goal
+    goals = driver.articles(class: 'train-list')
+
+    goals.each do |goal|
+      i = goal.dl(class: 'dep').dt.text.match(/([0-9][0-9]?).([0-9]{2})/)
+      @time = "#{i[1]}:#{i[2]}"
+
+      row_i = time2row_i[@time]
+
+      if row_i.blank?
+        @time2row_i[@time] = ws.max_rows + 1
+        row_i = time2row_i[@time]
+      else
+        # next # only new row
+      end
+
+      goal.p(class: 'start-button').click
+
+      eco   = driver.divs(class: 'economy-long').select do |div|
+        div.text.present? 
+      end.first.ps.first.text
+      green = driver.divs(class: 'green-long').select do |div|
+        div.text.present? 
+      end.first.ps.first.text
+
+      puts "eco: #{eco}"
+      puts "green: #{green}"
+
+      result = '無'
+      if eco != '×'
+        result = '有'
+      elsif green != '×'
+        result = 'グ'
+      end
+
+      # return driver if result == '有'
+
+      puts "#{@time}: #{result}"
+      driver.span(id: 'l-6').click
+
+      ws[row_i, 1] = @time
+      ws[row_i, @col_i] = result
+
+      ws.save
+    end
+   
+    if driver.a(id: 'l-2').present?
+      begin
+        driver.a(id: 'l-2').click
+      rescue
+        sleep 1
+        driver.span(id: 'l-6').click
+        driver.a(id: 'l-2').click
+      end
+      select_goal
+    else
+      return
+    end
+  end
+
+  def input_goal
+    driver.select_list(id: 's-2').select(@date)
+
+    hour_str = format("%02d", @time.split(':').first)
+    driver.select_list(id: 's-3').select(hour_str)
+    driver.select_list(id: 's-4').select('00')
+
+    # 乗車: 品川
+    # driver.select_list(id: 's6').select('020')
+    # 降車:新大阪
+    # driver.select_list(id: 's7').select('170')
+
+    driver.select_list(id: 's6').select('170')
+    driver.select_list(id: 's7').select('020')
+
+
+    driver.button(id: 'sb-1').click
+  end
+
+
+  def goto_yoyaku
+    driver.a(name: 'b-1').click
+  end
+
+   def login
+    driver.goto ENV['JR_WEST_URL']
+    driver.text_field(id: 'pw-1').set(ENV['JR_WEST_PASS'])
+    driver.button(id: 'sb-2').click
+  end
 end
