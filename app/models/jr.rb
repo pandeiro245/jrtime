@@ -102,8 +102,15 @@ class Jr
     goals = driver.articles(class: 'train-list')
 
     goals.each do |goal|
-      i = goal.dl(class: 'dep').dt.text.match(/([0-9][0-9]?).([0-9]{2})/)
-      @time = "#{i[1]}:#{i[2]}"
+      dia1 = goal.div(class: 'dia-1').dl(class: 'dep').dt.text
+      i1 = dia1.match(/([0-9][0-9]?).([0-9]{2})/)
+      if goal.div(class: 'dia-2').present?
+        dia2 = goal.div(class: 'dia-2').dl(class: 'dep').dt.text
+        i2 = dia2.match(/([0-9][0-9]?).([0-9]{2})/)
+        @time = "#{i1[1]}:#{i1[2]},#{i2[1]}:#{i2[2]}"
+      else
+        @time = "#{i1[1]}:#{i1[2]}"
+      end
 
       row_i = time2row_i[@time]
 
