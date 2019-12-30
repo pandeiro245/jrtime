@@ -1,16 +1,14 @@
 class Jr
   def initialize(driver=nil)
     @driver = driver
-    # @col_i = 2 # TODO
-    @col_i = 4 # TODO
-    # @date = '1月2日（木）' # TODO
-    @date = '1月3日（金）' # TODO
+    @col_i = 3 # TODO
+    @date = '1月2日（木）' # TODO
     @time = '6:00'
 
-    row_i = 2
-    @start_name = ws_log[row_i, 2]
+    log_row_i = 2
+    @start_name = ws_log[log_row_i, 2]
     @start_code = name2code[@start_name]
-    @goal_name  = ws_log[row_i, 3]
+    @goal_name  = ws_log[log_row_i, 3]
     @goal_code  = name2code[@goal_name]
     @sheet_title = "#{@start_name}→#{@goal_name}"
   end
