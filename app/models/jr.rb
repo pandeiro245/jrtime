@@ -72,18 +72,17 @@ class Jr
     select_goal
 
     loop do
-      select_goal
       if @time == time || time.split(':').first.to_i > 22
+        row_i = 2
+        col_i = 5
+        Time.zone = 'Tokyo'
+        ws_log[row_i, col_i] = Time.local.now 
         return time
       else
         exec
         time = @time
       end
     end
-    row_i = 2
-    col_i = 5
-    Time.zone = 'Tokyo'
-    ws_log[row_i, col_i] = Time.local.now 
   end
 
   def time2row_i
