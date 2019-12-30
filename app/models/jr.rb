@@ -76,7 +76,8 @@ class Jr
         row_i = 2
         col_i = 5
         Time.zone = 'Tokyo'
-        ws_log[row_i, col_i] = Time.local.now 
+        ws_log[row_i, col_i] = Time.zone.now 
+        ws_log.save
         return time
       else
         exec
