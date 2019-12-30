@@ -1,12 +1,13 @@
 class Jr
   def initialize(driver=nil)
     @driver = driver
-    @col_i = 2 # TODO
+    # @col_i = 2 # TODO
+    @col_i = 4 # TODO
+    # @date = '1月2日（木）' # TODO
     @date = '1月3日（金）' # TODO
     @time = '6:00'
 
     row_i = 2
-   
     @start_name = ws_log[row_i, 2]
     @start_code = name2code[@start_name]
     @goal_name  = ws_log[row_i, 3]
@@ -73,7 +74,7 @@ class Jr
     loop do
       select_goal
       if @time == time || time.split(':').first.to_i > 22
-        return
+        return time
       else
         exec
         time = @time
