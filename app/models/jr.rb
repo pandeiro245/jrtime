@@ -1,11 +1,31 @@
 class Jr
-  def initialize(driver=nil)
+  def self.exec
+    start = Time.now
+    jr = Jr.new
+    driver = jr.driver
+    from_day = 1
+    to_day   = 7
+    2.upto(jr.ws_log.max_rows).each do |log_row_i|
+      from_day.upto(to_day).each do |day|
+        puts "day is #{day}"
+        Jr.new(driver: driver, day: day, log_row_i: log_row_i).exec
+      end
+    end
+    sec = Time.now - start
+    puts "#{sec} seconds."
+  end
+
+  def initialize(driver: nil, day: 1, log_row_i: 2)
     @driver = driver
-    @col_i = 6 # TODO
-    @date = '1月5日（日）' # TODO
+    @col_i = day + 1
+    date = "2020-1-#{day}".to_date
+    wday = '日月火水木金土'.split('')[date.wday]
+    wday = '水・祝' if [1,13].include?(day)
+    t    = date.today? ? '【本日】' : ''
+    @date = "#{t}1月#{day}日（#{wday}）"
+    puts @date
     @time = '6:00'
 
-    log_row_i = 2
     @start_name = ws_log[log_row_i, 2]
     @start_code = name2code[@start_name]
     @goal_name  = ws_log[log_row_i, 3]
