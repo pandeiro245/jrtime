@@ -1,15 +1,21 @@
 class Jr
+  attr_accessor :log_row_i
+
   def self.exec
     start = Time.now
     jr = Jr.new
     driver = jr.driver
     from_day = 1
     to_day   = 7
-    2.upto(jr.ws_log.max_rows).each do |log_row_i|
+    3.upto(jr.ws_log.max_rows).each do |log_row_i|
+      jr.log_row_i = log_row_i
+      jr.save_start
       from_day.upto(to_day).each do |day|
         puts "day is #{day}"
-        Jr.new(driver: driver, day: day, log_row_i: log_row_i).exec
+        jr = Jr.new(driver: driver, day: day, log_row_i: log_row_i)
+        jr.exec
       end
+      jr.save_complete
     end
     sec = Time.now - start
     puts "#{sec} seconds."
@@ -18,6 +24,7 @@ class Jr
   def initialize(driver: nil, day: 1, log_row_i: 2)
     @driver = driver
     @col_i = day + 1
+    @log_row_i = log_row_i
     date = "2020-1-#{day}".to_date
     wday = '日月火水木金土'.split('')[date.wday]
     wday = '水・祝' if [1,13].include?(day)
@@ -33,6 +40,15 @@ class Jr
     @sheet_title = "#{@start_name}→#{@goal_name}"
   end
 
+  def save_start
+    ws_log[log_row_i, 4] = Time.zone.now
+    ws_log.save
+  end
+
+  def save_complete
+    ws_log[log_row_i, 5] = Time.zone.now
+    ws_log.save
+  end
 
   def name2code
     @name2code ||= get_name2code
