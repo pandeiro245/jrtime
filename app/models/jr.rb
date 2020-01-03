@@ -5,9 +5,9 @@ class Jr
     start = Time.now
     jr = Jr.new
     driver = jr.driver
-    from_day = 1
+    from_day = 3
     to_day   = 7
-    3.upto(jr.ws_log.max_rows).each do |log_row_i|
+    2.upto(jr.ws_log.max_rows).each do |log_row_i|
       jr.log_row_i = log_row_i
       jr.save_start
       from_day.upto(to_day).each do |day|
